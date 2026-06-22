@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fruit Patch</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f3ee;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.app { max-width: 700px; width: 100%; }
+
+/* Sign-in */
+.signin-screen, .main-screen { display: none; }
+.signin-screen.active, .main-screen.active { display: block; }
+
+.signin-card {
+  background: white;
+  border: 1px solid #e8e6e0;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.signin-card h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2c2c2a;
+  margin-bottom: 4px;
+}
+.signin-card .sub {
+  font-size: 15px;
+  color: #888;
+  margin-bottom: 2rem;
+}
+.signin-card input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d3d1c7;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 1.25rem;
+  transition: border-color 0.2s;
+}
+.signin-card input[type="text"]:focus { border-color: #1D9E75; }
+.fruit-label { font-size: 14px; color: #888; margin-bottom: 10px; text-align: left; }
+
+.fruit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.fruit-opt {
+  padding: 14px 4px;
+  border: 1.5px solid #e8e6e0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 32px;
+  transition: all 0.2s;
+  background: white;
+}
+.fruit-opt:hover { border-color: #b4b2a9; transform: translateY(-2px); }
+.fruit-opt.selected { border-color: #1D9E75; border-width: 2px; background: #e8f8f0; }
+.fruit-opt .fname { font-size: 12px; color: #888; margin-top: 6px; display: block; }
+
+.join-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #1D9E75, #17b87e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.join-btn:hover { opacity: 0.9; }
+.join-btn:active { transform: scale(0.98); }
+.join-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+
+/* Main screen */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header h2 { font-size: 20px; font-weight: 600; color: #2c2c2a; }
+.welcome-tag {
+  font-size: 13px;
+  color: #1D9E75;
+  background: #e8f8f0;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: #e8e6e0; border-radius: 12px; padding: 4px; }
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.tab.active { background: white; color: #2c2c2a; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Garden scene */
+.garden-scene {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  position: relative;
+  min-height: 340px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.garden-bg { position: absolute; inset: 0; z-index: 0; }
+.garden-overlay { position: relative; z-index: 1; padding: 1.25rem 1.5rem; }
+.garden-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.garden-label {
+  font-size: 15px; font-weight: 600; color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.garden-count {
+  font-size: 13px; color: white; background: rgba(0,0,0,0.25);
+  padding: 5px 14px; border-radius: 20px; font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+.fruit-garden {
+  display: flex; flex-wrap: wrap; gap: 6px; min-height: 100px;
+  padding-top: 80px;
+  align-items: flex-end; align-content: flex-end;
+}
+.garden-fruit {
+  font-size: 32px;
+  animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  cursor: default;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+  transition: transform 0.15s;
+}
+.garden-fruit:hover { transform: scale(1.2); }
+.garden-fruit .tooltip {
+  display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: white; border-radius: 8px; padding: 4px 10px; font-size: 12px;
+  white-space: nowrap; color: #555; z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.garden-fruit:hover .tooltip { display: block; }
+@keyframes pop {
+  0% { transform: scale(0) rotate(-10deg); }
+  60% { transform: scale(1.25) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Members */
+.members-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e8e6e0;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.members-title { font-size: 15px; font-weight: 600; color: #2c2c2a; margin-bottom: 14px; }
+.member-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid #f0ede6;
+}
+.member-row:last-child { border-bottom: none; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; background: #f5f3ee;
+}
+.member-info { flex: 1; }
+.member-name { font-size: 14px; font-weight: 500; color: #2c2c2a; }
+.member-milestones { display: flex; gap: 5px; margin-top: 6px; }
+.ms-circle {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid #d3d1c7;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent;
+  background: white; transition: all 0.3s;
+}
+.ms-circle.done { background: #1D9E75; border-color: #1D9E75; color: white; }
+.ms-circle .num { font-size: 10px; color: #b4b2a9; }
+.ms-circle.done .num { display: none; }
+.member-score { font-size: 13px; color: #888; font-weight: 500; }
+
+/* Tasks */
+.tasks-intro {
+  font-size: 14px; color: #888; margin-bottom: 1rem;
+  background: white; border-radius: 12px; padding: 14px 18px;
+  border: 1px solid #e8e6e0;
+}
+.task-card {
+  background: white;
+  border: 1px solid #e8e6e0;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+}
+.task-card:hover { border-color: #b4b2a9; transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
+.task-card.completed { border-color: #b8e6d0; background: #f8fdf9; }
+.task-card.completed:hover { transform: none; }
+.task-header { display: flex; align-items: center; gap: 12px; }
+.task-check {
+  width: 26px; height: 26px;
+  border: 2px solid #d3d1c7;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: transparent;
+  transition: all 0.2s;
+}
+.task-card.completed .task-check { background: #1D9E75; color: white; border-color: #1D9E75; }
+.task-title { font-size: 15px; font-weight: 500; flex: 1; color: #2c2c2a; }
+.task-status { font-size: 12px; color: #888; }
+.task-card.completed .task-status { color: #1D9E75; font-weight: 500; }
+.task-desc { font-size: 13px; color: #888; margin-top: 6px; margin-left: 38px; line-height: 1.5; }
+
+.remark-box { display: none; margin: 14px 0 0 38px; }
+.remark-box.open { display: block; animation: slideDown 0.2s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.remark-box textarea {
+  width: 100%; height: 70px; margin-bottom: 10px; font-size: 14px; resize: vertical;
+  border: 1px solid #d3d1c7; border-radius: 10px; padding: 10px 14px;
+  font-family: inherit; outline: none;
+}
+.remark-box textarea:focus { border-color: #1D9E75; }
+.submit-remark {
+  padding: 8px 20px;
+  background: #1D9E75;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-remark:hover { background: #0F6E56; }
+
+.remark-display {
+  margin: 10px 0 0 38px;
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+  background: #f5f3ee;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="signin-screen active" id="signin">
+    <div class="signin-card">
+      <h1>&#127793; Fruit Patch</h1>
+      <p class="sub">Grow together, one milestone at a time</p>
+      <input type="text" id="nameInput" placeholder="Enter your name" />
+      <p class="fruit-label">Choose your fruit</p>
+      <div class="fruit-grid" id="fruitGrid"></div>
+      <button class="join-btn" id="joinBtn" disabled onclick="joinApp()">Join the patch</button>
+    </div>
+  </div>
+
+  <div class="main-screen" id="main">
+    <div class="header">
+      <div class="header-left">
+        <h2>&#127793; Fruit Patch</h2>
+      </div>
+      <span class="welcome-tag" id="welcomeMsg"></span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-btn-garden" onclick="switchTab('garden')">
+        <i class="ti ti-plant-2" style="font-size:16px; vertical-align:-2px; margin-right:4px;"></i>Our garden
+      </button>
+      <button class="tab" id="tab-btn-tasks" onclick="switchTab('tasks')">
+        <i class="ti ti-checkbox" style="font-size:16px; vertical-align:-2px; margin-right:4px;"></i>My tasks
+      </button>
+    </div>
+
+    <div class="tab-content active" id="tab-garden">
+      <div class="garden-scene">
+        <svg class="garden-bg" viewBox="0 0 700 340" preserveAspectRatio="xMidYMid slice">
+          <rect fill="#87CEEB" width="700" height="340"/>
+          <circle fill="#FFD93D" cx="600" cy="55" r="40"/>
+          <circle fill="#FFF5CC" cx="600" cy="55" r="50" opacity="0.2"/>
+          <ellipse fill="white" cx="130" cy="55" rx="55" ry="20" opacity="0.85"/>
+          <ellipse fill="white" cx="155" cy="47" rx="38" ry="15" opacity="0.85"/>
+          <ellipse fill="white" cx="110" cy="50" rx="28" ry="12" opacity="0.85"/>
+          <ellipse fill="white" cx="380" cy="68" rx="45" ry="16" opacity="0.8"/>
+          <ellipse fill="white" cx="405" cy="60" rx="32" ry="12" opacity="0.8"/>
+          <ellipse fill="#4a8f3f" cx="170" cy="205" rx="260" ry="85"/>
+          <ellipse fill="#4a8f3f" cx="560" cy="215" rx="230" ry="75"/>
+          <ellipse fill="#5cb54a" cx="350" cy="235" rx="420" ry="95"/>
+          <rect fill="#8B6B4A" x="0" y="250" width="700" height="90"/>
+          <rect fill="#7a5c3a" x="0" y="250" width="700" height="6" rx="3"/>
+          <rect fill="#5cb54a" x="0" y="242" width="700" height="14" rx="7"/>
+          <rect fill="#C49A6C" x="28" y="210" width="7" height="38" rx="2"/>
+          <rect fill="#C49A6C" x="78" y="210" width="7" height="38" rx="2"/>
+          <rect fill="#C49A6C" x="128" y="210" width="7" height="38" rx="2"/>
+          <rect fill="#C49A6C" x="178" y="210" width="7" height="38" rx="2"/>
+          <rect fill="#C49A6C" x="228" y="213" width="7" height="35" rx="2"/>
+          <rect fill="#C49A6C" x="278" y="215" width="7" height="33" rx="2"/>
+          <line x1="30" y1="220" x2="283" y2="226" stroke="#C49A6C" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="232" x2="283" y2="236" stroke="#C49A6C" stroke-width="3" stroke-linecap="round"/>
+          <ellipse fill="#3E8E41" cx="460" cy="232" rx="20" ry="12" opacity="0.5"/>
+          <ellipse fill="#3E8E41" cx="580" cy="228" rx="16" ry="10" opacity="0.4"/>
+          <ellipse fill="#2E7D32" cx="640" cy="238" rx="24" ry="14" opacity="0.45"/>
+          <ellipse fill="#388E3C" cx="350" cy="230" rx="14" ry="9" opacity="0.35"/>
+          <circle fill="#c0392b" cx="468" cy="224" r="4" opacity="0.6"/>
+          <circle fill="#c0392b" cx="455" cy="228" r="3" opacity="0.5"/>
+          <circle fill="#e74c3c" cx="645" cy="230" r="3.5" opacity="0.5"/>
+        </svg>
+        <div class="garden-overlay">
+          <div class="garden-header">
+            <span class="garden-label"><i class="ti ti-plant-2" style="font-size:18px; vertical-align:-2px; margin-right:5px;"></i>Our shared fruit patch</span>
+            <span class="garden-count"><span id="fruitCount">0</span> / <span id="totalFruit">150</span> fruits</span>
+          </div>
+          <div class="fruit-garden" id="gardenArea"></div>
+        </div>
+      </div>
+
+      <div class="members-card">
+        <div class="members-title">Members</div>
+        <div id="membersList"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-tasks">
+      <div class="tasks-intro">
+        <i class="ti ti-sparkles" style="font-size:16px; vertical-align:-2px; margin-right:4px; color:#1D9E75;"></i>
+        Complete tasks to grow fruits in the shared patch. Each task = one fruit!
+      </div>
+      <div id="tasksList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FRUITS = [
+  { emoji: '🍎', name: 'Apple' },
+  { emoji: '🍓', name: 'Strawberry' },
+  { emoji: '🍊', name: 'Orange' },
+  { emoji: '🍉', name: 'Watermelon' },
+  { emoji: '🍇', name: 'Grape' },
+  { emoji: '🍑', name: 'Peach' },
+  { emoji: '🍒', name: 'Cherry' },
+  { emoji: '🥭', name: 'Mango' }
+];
+
+const TASKS = [
+  { id: 1, title: 'Task 1: Share a learning', desc: 'Share something new you learned this week' },
+  { id: 2, title: 'Task 2: Give a compliment', desc: 'Recognise a teammate for something they did well' },
+  { id: 3, title: 'Task 3: Try something new', desc: 'Step outside your comfort zone and reflect on it' },
+  { id: 4, title: 'Task 4: Help a colleague', desc: 'Lend a hand to someone on the team' },
+  { id: 5, title: 'Task 5: Set a goal', desc: 'Define one personal growth goal for the month' }
+];
+
+const SAMPLE_MEMBERS = [
+  { name: 'Sarah', fruit: '🍓', tasks: [true,true,true,false,false] },
+  { name: 'James', fruit: '🍎', tasks: [true,true,true,true,true] },
+  { name: 'Mei', fruit: '🥭', tasks: [true,true,false,false,false] },
+  { name: 'Alex', fruit: '🍇', tasks: [true,true,true,true,false] },
+  { name: 'Priya', fruit: '🍑', tasks: [true,false,false,false,false] }
+];
+
+let selectedFruit = null;
+let userName = '';
+let completedTasks = {};
+
+// Load saved state
+const saved = localStorage.getItem('fruitPatchUser');
+if (saved) {
+  const data = JSON.parse(saved);
+  userName = data.name;
+  selectedFruit = data.fruit;
+  completedTasks = data.tasks || {};
+}
+
+// Build fruit grid
+const grid = document.getElementById('fruitGrid');
+FRUITS.forEach(f => {
+  const d = document.createElement('div');
+  d.className = 'fruit-opt';
+  d.innerHTML = f.emoji + '<span class="fname">' + f.name + '</span>';
+  d.onclick = () => {
+    document.querySelectorAll('.fruit-opt').forEach(el => el.classList.remove('selected'));
+    d.classList.add('selected');
+    selectedFruit = f;
+    checkReady();
+  };
+  grid.appendChild(d);
+});
+
+document.getElementById('nameInput').addEventListener('input', checkReady);
+function checkReady() {
+  document.getElementById('joinBtn').disabled = !(document.getElementById('nameInput').value.trim() && selectedFruit);
+}
+
+// Auto-login if returning user
+if (saved) {
+  document.getElementById('signin').classList.remove('active');
+  document.getElementById('main').classList.add('active');
+  document.getElementById('welcomeMsg').textContent = userName + ' ' + selectedFruit.emoji;
+  renderGarden();
+  renderMembers();
+  renderTasks();
+}
+
+function joinApp() {
+  userName = document.getElementById('nameInput').value.trim();
+  saveState();
+  document.getElementById('signin').classList.remove('active');
+  document.getElementById('main').classList.add('active');
+  document.getElementById('welcomeMsg').textContent = userName + ' ' + selectedFruit.emoji;
+  renderGarden();
+  renderMembers();
+  renderTasks();
+}
+
+function saveState() {
+  localStorage.setItem('fruitPatchUser', JSON.stringify({
+    name: userName,
+    fruit: selectedFruit,
+    tasks: completedTasks
+  }));
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tab-btn-' + tab).classList.add('active');
+}
+
+function getMyTasks() {
+  return [1,2,3,4,5].map(id => !!completedTasks[id]);
+}
+function countDone(arr) { return arr.filter(Boolean).length; }
+
+function renderGarden() {
+  const garden = document.getElementById('gardenArea');
+  garden.innerHTML = '';
+  let total = 0;
+  const allMembers = [...SAMPLE_MEMBERS, { name: userName, fruit: selectedFruit.emoji, tasks: getMyTasks() }];
+  allMembers.forEach(m => {
+    const n = countDone(m.tasks);
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('span');
+      s.className = 'garden-fruit';
+      s.innerHTML = m.fruit + '<span class="tooltip">' + m.name + '</span>';
+      garden.appendChild(s);
+      total++;
+    }
+  });
+  document.getElementById('fruitCount').textContent = total;
+}
+
+function renderMembers() {
+  const list = document.getElementById('membersList');
+  const allMembers = [...SAMPLE_MEMBERS, { name: userName + ' (you)', fruit: selectedFruit.emoji, tasks: getMyTasks() }];
+  list.innerHTML = allMembers.map(m => {
+    const circles = m.tasks.map((done, i) =>
+      '<div class="ms-circle' + (done ? ' done' : '') + '">' +
+      (done ? '<i class="ti ti-check" style="font-size:14px;"></i>' : '<span class="num">' + (i+1) + '</span>') +
+      '</div>'
+    ).join('');
+    return '<div class="member-row">' +
+      '<div class="avatar">' + m.fruit + '</div>' +
+      '<div class="member-info"><div class="member-name">' + m.name + '</div>' +
+      '<div class="member-milestones">' + circles + '</div></div>' +
+      '<div class="member-score">' + countDone(m.tasks) + '/5</div></div>';
+  }).join('');
+}
+
+function renderTasks() {
+  const list = document.getElementById('tasksList');
+  list.innerHTML = TASKS.map(t => {
+    const done = completedTasks[t.id];
+    return '<div class="task-card' + (done ? ' completed' : '') + '">' +
+      '<div class="task-header" onclick="toggleTask(' + t.id + ')">' +
+      '<div class="task-check">' + (done ? '<i class="ti ti-check"></i>' : '') + '</div>' +
+      '<div class="task-title">' + t.title + '</div>' +
+      '<div class="task-status">' + (done ? 'Completed ✓' : '') + '</div></div>' +
+      '<div class="task-desc">' + t.desc + '</div>' +
+      (done ? '<div class="remark-display">"' + done + '"</div>' : '') +
+      '<div class="remark-box" id="remark-' + t.id + '">' +
+      '<textarea placeholder="Share your thoughts or reflection..."></textarea>' +
+      '<button class="submit-remark" onclick="submitTask(' + t.id + ')"><i class="ti ti-check" style="font-size:14px; vertical-align:-1px; margin-right:4px;"></i>Complete task</button></div></div>';
+  }).join('');
+}
+
+function toggleTask(id) {
+  if (completedTasks[id]) return;
+  document.querySelectorAll('.remark-box').forEach(b => { if (b.id !== 'remark-' + id) b.classList.remove('open'); });
+  const box = document.getElementById('remark-' + id);
+  box.classList.toggle('open');
+  if (box.classList.contains('open')) box.querySelector('textarea').focus();
+}
+
+function submitTask(id) {
+  const textarea = document.querySelector('#remark-' + id + ' textarea');
+  completedTasks[id] = textarea.value.trim() || 'Completed!';
+  saveState();
+  renderTasks();
+  renderGarden();
+  renderMembers();
+}
+</script>
+
+</body>
+</html>
